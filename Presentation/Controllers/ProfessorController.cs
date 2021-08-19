@@ -1,30 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Data.Data;
+﻿using Domain.Model.Interfaces.Services;
 using Domain.Model.Models;
-using Domain.Model.Interfaces.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Presentation.Controllers
 {
     public class ProfessorController : Controller
     {
-        private readonly PresentationContext _context;
+        
         private readonly IProfessorService _professorService;
 
-        public ProfessorController(PresentationContext context, IProfessorService professorService)
+        public ProfessorController(IProfessorService professorService)
         {
-            _context = context;
+            
+            _professorService = professorService;
         }
 
         // GET: Professor
         public async Task<IActionResult> Index()
         {
-            return View(await _professorService.GetAllAsync(true, "Juli"));
+            return View(await _professorService.GetAllAsync(true));
         }
 
         // GET: Professor/Details/5
@@ -35,10 +31,8 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var professorModel = await _context
-                .Professores
-                .Include(x=>x.Alunos)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var professorModel = await _professorService.GetByIdAsync(id.Value);
+                
             if (professorModel == null)
             {
                 return NotFound();
@@ -58,15 +52,14 @@ namespace Presentation.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,UltimoNome,Contratacao,QntdDisciplinas")] ProfessorModel professorModel)
+        public async Task<IActionResult> Create(ProfessorModel professorModel)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(professorModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(professorModel);
             }
-            return View(professorModel);
+            var professorCreated = await _professorService.CreateAsync(professorModel);
+            return RedirectToAction(nameof(Details), new { id = professorCreated.Id });
         }
 
         // GET: Professor/Edit/5
@@ -77,7 +70,7 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var professorModel = await _context.Professores.FindAsync(id);
+            var professorModel = await _professorService.GetByIdAsync(id.Value);
             if (professorModel == null)
             {
                 return NotFound();
@@ -90,7 +83,7 @@ namespace Presentation.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,UltimoNome,Contratacao,QntdDisciplinas")] ProfessorModel professorModel)
+        public async Task<IActionResult> Edit(int id, ProfessorModel professorModel)
         {
             if (id != professorModel.Id)
             {
@@ -101,12 +94,11 @@ namespace Presentation.Controllers
             {
                 try
                 {
-                    _context.Update(professorModel);
-                    await _context.SaveChangesAsync();
+                    await _professorService.EditAsync(professorModel);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProfessorModelExists(professorModel.Id))
+                    if (!(await ProfessorModelExists(professorModel.Id)))
                     {
                         return NotFound();
                     }
@@ -128,8 +120,7 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var professorModel = await _context.Professores
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var professorModel = await _professorService.GetByIdAsync(id.Value);
             if (professorModel == null)
             {
                 return NotFound();
@@ -143,15 +134,17 @@ namespace Presentation.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var professorModel = await _context.Professores.FindAsync(id);
-            _context.Professores.Remove(professorModel);
-            await _context.SaveChangesAsync();
+            await _professorService.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProfessorModelExists(int id)
+        private async Task<bool> ProfessorModelExists(int id)
         {
-            return _context.Professores.Any(e => e.Id == id);
+            var professor = await _professorService.GetByIdAsync(id);
+
+            var any = professor != null;
+
+            return any;
         }
     }
 }

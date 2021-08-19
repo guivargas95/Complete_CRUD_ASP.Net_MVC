@@ -22,17 +22,34 @@ namespace Data.Repositories
 
         public async Task<ProfessorModel> CreateAsync(ProfessorModel professorModel)
         {
-            throw new NotImplementedException();
+           var professor = _presentationContext.Professores.Add(professorModel);
+
+            await _presentationContext.SaveChangesAsync();
+
+            return professor.Entity;
         }
 
         public async Task DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var professor = await GetByIdAsync(id);
+
+            _presentationContext.Professores.Remove(professor);
+
+            await _presentationContext.SaveChangesAsync();
+
+
+               
+
+
         }
 
         public async Task<ProfessorModel> EditAsync(ProfessorModel professorModel)
         {
-            throw new NotImplementedException();
+            var professor = _presentationContext.Professores.Update(professorModel);
+
+            await _presentationContext.SaveChangesAsync();
+
+            return professor.Entity;
         }
 
         public async Task<IEnumerable<ProfessorModel>> GetAllAsync(bool orderAscendant, string search = null)
@@ -53,7 +70,12 @@ namespace Data.Repositories
 
         public async Task<ProfessorModel> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var professor = await _presentationContext
+                .Professores
+                .Include(x => x.Alunos)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            return professor;
         }
     }
 }
