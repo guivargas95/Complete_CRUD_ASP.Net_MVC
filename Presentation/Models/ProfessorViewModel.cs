@@ -1,8 +1,6 @@
-﻿using Domain.Model.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Presentation.Models
 {
@@ -11,51 +9,23 @@ namespace Presentation.Models
 
         public int Id { get; set; }
 
+        [Required]
+        [StringLength(25)]
         public string Nome { get; set; }
 
+        [Required]
+        [StringLength(25)]
         public string UltimoNome { get; set; }
 
+        [Required]
         public DateTime Contratacao { get; set; }
 
+        [Required]
         public int QntdDisciplinas { get; set; }
 
+        [Required]
         public List<AlunoViewModel> Alunos { get; set; }
 
-        public static ProfessorViewModel From(ProfessorModel professorModel)
-        {
-            var professorViewModel = new ProfessorViewModel
-            {
-                Id = professorModel.Id,
-                Nome = professorModel.Nome,
-                UltimoNome = professorModel.UltimoNome,
-                Contratacao = professorModel.Contratacao,
-                QntdDisciplinas = professorModel.QntdDisciplinas,
-                
-                Alunos = professorModel?.Alunos.Select(x => AlunoViewModel.From(x, false)).ToList(),
-
-
-            };
-
-            return professorViewModel;
-        }
-
-        public ProfessorModel ToModel()
-        {
-            var professorModel = new ProfessorModel
-            {
-                Id = Id,
-                Nome = Nome,
-                UltimoNome = UltimoNome,
-                Contratacao = Contratacao,
-                QntdDisciplinas = QntdDisciplinas,
-                Alunos = Alunos?.Select(x => x.ToModel(false)).ToList(),
-            };
-
-
-
-
-
-            return professorModel;
-        }
+        
     }
 }

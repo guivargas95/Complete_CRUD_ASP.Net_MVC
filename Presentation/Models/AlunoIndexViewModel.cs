@@ -1,4 +1,4 @@
-﻿using Domain.Model.Models;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +12,6 @@ namespace Presentation.Models
 
         public bool OrderAscendant { get; set; }
 
-        public IEnumerable<AlunoModel> Alunos { get; set; }
+        public IEnumerable<AlunoViewModel> Alunos { get; set; }
     }
 }

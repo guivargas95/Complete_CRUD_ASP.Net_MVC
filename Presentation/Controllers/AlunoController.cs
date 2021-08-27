@@ -1,19 +1,18 @@
-﻿using Domain.Model.Interfaces.Services;
-using Domain.Model.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Presentation.Models;
+using Presentation.Services;
 using System.Threading.Tasks;
 
 namespace Presentation.Controllers
 {
     public class AlunoController : Controller
     {
-        private readonly IAlunoService _alunoService;
-        private readonly IProfessorService _professorService;
+        private readonly IAlunoHttpService _alunoService;
+        private readonly IProfessorHttpService _professorService;
 
-        public AlunoController(IAlunoService alunoService, IProfessorService professorService)
+        public AlunoController(IAlunoHttpService alunoService, IProfessorHttpService professorService)
         {
 
             _alunoService = alunoService;
@@ -42,14 +41,14 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var alunoModel = await _alunoService.GetByIdAsync(id.Value);
+            var alunoViewModel = await _alunoService.GetByIdAsync(id.Value);
 
-            if (alunoModel == null)
+            if (alunoViewModel == null)
             {
                 return NotFound();
             }
 
-            var alunoViewModel = AlunoViewModel.From(alunoModel);
+            
             return View(alunoViewModel);
         }
 
@@ -73,8 +72,8 @@ namespace Presentation.Controllers
                 
                 return View(alunoViewModel);
             }
-            var alunoModel = alunoViewModel.ToModel();
-            var alunoCreated = await _alunoService.CreateAsync(alunoModel);
+
+            var alunoCreated = await _alunoService.CreateAsync(alunoViewModel);
             return RedirectToAction(nameof(Details), new { id = alunoCreated.Id });
         }
 
@@ -85,8 +84,8 @@ namespace Presentation.Controllers
 
             ViewBag.Professores = new SelectList(
                 professores,
-                nameof(ProfessorModel.Id),
-                nameof(ProfessorModel.Nome),
+                nameof(ProfessorViewModel.Id),
+                nameof(ProfessorViewModel.Nome),
                 professorId);
         }
 
@@ -98,15 +97,15 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var alunoModel = await _alunoService.GetByIdAsync(id.Value);
-            if (alunoModel == null)
+            var alunoViewModel = await _alunoService.GetByIdAsync(id.Value);
+            if (alunoViewModel == null)
             {
                 return NotFound();
             }
             
-            await PreencherSelectProfessores(alunoModel.ProfessorId);
+            await PreencherSelectProfessores(alunoViewModel.ProfessorId);
 
-            var alunoViewModel = AlunoViewModel.From(alunoModel);
+            
             return View(alunoViewModel);
         }
 
@@ -129,14 +128,14 @@ namespace Presentation.Controllers
 
                 return View(alunoViewModel);
             }
-            var alunoModel = alunoViewModel.ToModel();
+
             try
             {
-                await _alunoService.EditAsync(alunoModel);
+                await _alunoService.EditAsync(alunoViewModel);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!(await AlunoModelExists(alunoModel.Id)))
+                if (!(await AlunoModelExists(alunoViewModel.Id)))
                 {
                     return NotFound();
                 }
@@ -156,13 +155,13 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var alunoModel = await _alunoService.GetByIdAsync(id.Value);
-            if (alunoModel == null)
+            var alunoViewModel = await _alunoService.GetByIdAsync(id.Value);
+            if (alunoViewModel == null)
             {
                 return NotFound();
             }
 
-            var alunoViewModel = AlunoViewModel.From(alunoModel);
+            
             return View(alunoViewModel);
         }
 

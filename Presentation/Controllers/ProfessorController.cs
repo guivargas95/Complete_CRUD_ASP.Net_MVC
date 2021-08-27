@@ -1,8 +1,7 @@
-﻿using Domain.Model.Interfaces.Services;
-using Domain.Model.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Presentation.Models;
+using Presentation.Services;
 using System.Threading.Tasks;
 
 namespace Presentation.Controllers
@@ -10,12 +9,14 @@ namespace Presentation.Controllers
     public class ProfessorController : Controller
     {
         
-        private readonly IProfessorService _professorService;
+     
+        private readonly IProfessorHttpService _professorHttpService;
 
-        public ProfessorController(IProfessorService professorService)
+        public ProfessorController(IProfessorHttpService professorHttpService)
         {
             
-            _professorService = professorService;
+            
+            _professorHttpService = professorHttpService;
         }
 
         // GET: Professor
@@ -25,7 +26,7 @@ namespace Presentation.Controllers
             {
                 Search = professorIndexRequest.Search,
                 OrderAscendant = professorIndexRequest.OrderAscendant,
-                Professores = await _professorService.GetAllAsync(professorIndexRequest.OrderAscendant, professorIndexRequest.Search)
+                Professores = await _professorHttpService.GetAllAsync(professorIndexRequest.OrderAscendant, professorIndexRequest.Search)
 
             };
             
@@ -41,14 +42,14 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var professorModel = await _professorService.GetByIdAsync(id.Value);
+            var professorViewModel = await _professorHttpService.GetByIdAsync(id.Value);
                 
-            if (professorModel == null)
+            if (professorViewModel == null)
             {
                 return NotFound();
             }
 
-            var professorViewModel = ProfessorViewModel.From(professorModel);
+            
 
             return View(professorViewModel);
         }
@@ -71,8 +72,7 @@ namespace Presentation.Controllers
                 return View(professorViewModel);
             }
 
-            var professorModel = professorViewModel.ToModel();
-            var professorCreated = await _professorService.CreateAsync(professorModel);
+            var professorCreated = await _professorHttpService.CreateAsync(professorViewModel);
 
             return RedirectToAction(nameof(Details), new { id = professorCreated.Id });
         }
@@ -85,12 +85,12 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var professorModel = await _professorService.GetByIdAsync(id.Value);
-            if (professorModel == null)
+            var professorViewModel = await _professorHttpService.GetByIdAsync(id.Value);
+            if (professorViewModel == null)
             {
                 return NotFound();
             }
-            var professorViewModel = ProfessorViewModel.From(professorModel);
+            
             return View(professorViewModel);
         }
 
@@ -111,14 +111,14 @@ namespace Presentation.Controllers
                 return View(professorViewModel);
             }
 
-            var professorModel = professorViewModel.ToModel();
+            
             try
             {
-                await _professorService.EditAsync(professorModel);
+                await _professorHttpService.EditAsync(professorViewModel);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!(await ProfessorModelExists(professorModel.Id)))
+                if (!(await ProfessorModelExists(professorViewModel.Id)))
                 {
                     return NotFound();
                 }
@@ -138,13 +138,13 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            var professorModel = await _professorService.GetByIdAsync(id.Value);
-            if (professorModel == null)
+            var professorViewModel = await _professorHttpService.GetByIdAsync(id.Value);
+            if (professorViewModel == null)
             {
                 return NotFound();
             }
 
-            var professorViewModel = ProfessorViewModel.From(professorModel);
+            
             return View(professorViewModel);
         }
 
@@ -153,13 +153,13 @@ namespace Presentation.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _professorService.DeleteAsync(id);
+            await _professorHttpService.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
         private async Task<bool> ProfessorModelExists(int id)
         {
-            var professor = await _professorService.GetByIdAsync(id);
+            var professor = await _professorHttpService.GetByIdAsync(id);
 
             var any = professor != null;
 
