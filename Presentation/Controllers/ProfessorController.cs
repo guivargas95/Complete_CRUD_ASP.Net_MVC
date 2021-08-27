@@ -2,6 +2,7 @@
 using Domain.Model.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Presentation.Models;
 using System.Threading.Tasks;
 
 namespace Presentation.Controllers
@@ -18,9 +19,18 @@ namespace Presentation.Controllers
         }
 
         // GET: Professor
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(ProfessorIndexViewModel professorIndexRequest)
         {
-            return View(await _professorService.GetAllAsync(true));
+            var professorIndexViewModel = new ProfessorIndexViewModel
+            {
+                Search = professorIndexRequest.Search,
+                OrderAscendant = professorIndexRequest.OrderAscendant,
+                Professores = await _professorService.GetAllAsync(professorIndexRequest.OrderAscendant, professorIndexRequest.Search)
+
+            };
+            
+            
+            return View(professorIndexViewModel);
         }
 
         // GET: Professor/Details/5
@@ -38,7 +48,9 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            return View(professorModel);
+            var professorViewModel = ProfessorViewModel.From(professorModel);
+
+            return View(professorViewModel);
         }
 
         // GET: Professor/Create
@@ -52,13 +64,16 @@ namespace Presentation.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProfessorModel professorModel)
+        public async Task<IActionResult> Create(ProfessorViewModel professorViewModel)
         {
             if (!ModelState.IsValid)
             {
-                return View(professorModel);
+                return View(professorViewModel);
             }
+
+            var professorModel = professorViewModel.ToModel();
             var professorCreated = await _professorService.CreateAsync(professorModel);
+
             return RedirectToAction(nameof(Details), new { id = professorCreated.Id });
         }
 
@@ -75,7 +90,8 @@ namespace Presentation.Controllers
             {
                 return NotFound();
             }
-            return View(professorModel);
+            var professorViewModel = ProfessorViewModel.From(professorModel);
+            return View(professorViewModel);
         }
 
         // POST: Professor/Edit/5
@@ -83,33 +99,35 @@ namespace Presentation.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ProfessorModel professorModel)
+        public async Task<IActionResult> Edit(int id, ProfessorViewModel professorViewModel)
         {
-            if (id != professorModel.Id)
+            if (id != professorViewModel.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    await _professorService.EditAsync(professorModel);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!(await ProfessorModelExists(professorModel.Id)))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return View(professorViewModel);
             }
-            return View(professorModel);
+
+            var professorModel = professorViewModel.ToModel();
+            try
+            {
+                await _professorService.EditAsync(professorModel);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!(await ProfessorModelExists(professorModel.Id)))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Professor/Delete/5
@@ -126,7 +144,8 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            return View(professorModel);
+            var professorViewModel = ProfessorViewModel.From(professorModel);
+            return View(professorViewModel);
         }
 
         // POST: Professor/Delete/5

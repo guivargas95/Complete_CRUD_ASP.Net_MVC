@@ -26,6 +26,8 @@ namespace Crosscutting.IoC
 
             services.AddTransient<IProfessorService, ProfessorService>();
             services.AddTransient<IProfessorRepository, ProfessorRepository>();
+            services.AddTransient<IAlunoService, AlunoService>();
+            services.AddTransient<IAlunoRepository, AlunoRepository>();
 
         }
     }

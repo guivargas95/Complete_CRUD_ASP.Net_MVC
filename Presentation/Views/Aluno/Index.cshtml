@@ -1,10 +1,24 @@
-﻿@model IEnumerable<Domain.Model.Models.AlunoModel>
+﻿@model AlunoIndexViewModel
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Alunos Matriculados</h1>
+
+<h1>Search</h1>
+<form asp-action="Index">
+    <label>Busca:</label>
+    <input type="text" asp-for="@Model.Search" />
+    <br />
+    <label>Ordenação por Nome:</label>
+    <select asp-for="OrderAscendant">
+        <option value="@true">Ascendente</option>
+        <option value="@false">Descendente</option>
+    </select>
+    <br />
+    <button>go!</button>
+</form>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -13,53 +27,54 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Nome)
+                @Html.DisplayNameFor(model => model.Alunos.First().Nome)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.UltimoNome)
+                @Html.DisplayNameFor(model => model.Alunos.First().UltimoNome)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Curso)
+                @Html.DisplayNameFor(model => model.Alunos.First().Curso)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DataMatricula)
+                @Html.DisplayNameFor(model => model.Alunos.First().DataMatricula)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Matricula)
+                @Html.DisplayNameFor(model => model.Alunos.First().Matricula)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Professor)
+                @Html.DisplayNameFor(model => model.Alunos.First().Professor)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nome)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UltimoNome)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Curso)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataMatricula)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Matricula)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Professor.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model.Alunos)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nome)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UltimoNome)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Curso)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DataMatricula)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Matricula)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Professor.Id)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
